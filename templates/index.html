@@ -359,22 +359,29 @@
             if (!mlReady) return;
             
             try {
-                const response = await fetch('/sample_data');
-                const samples = await response.json();
-                
-                // Utiliser l'exemple du cancer du sein
-                const breastCancerSample = samples["Cancer du sein"];
-                
-                // Remplir le formulaire avec ces valeurs
-                const genes = [{% for gene in genes %}'{{ gene }}'{% if not loop.last %}, {% endif %}{% endfor %}];
-                
-                genes.forEach((gene, index) => {
-                    document.getElementById(gene).value = breastCancerSample[index] || 0;
-                });
-                
-            } catch (error) {
-                alert('Erreur lors du chargement des données d\'exemple: ' + error.message);
-            }
+    	        const response = await fetch('/sample_data');
+    		const samples = await response.json();
+
+    		// Liste des types de cancer disponibles
+    		const cancerTypes = Object.keys(samples);
+
+    		// Choisir un type de cancer au hasard
+    		const randomType = cancerTypes[Math.floor(Math.random() * cancerTypes.length)];
+
+    		// Récupérer les valeurs de l'échantillon correspondant
+    		const sample = samples[randomType];
+
+   		 // Remplir le formulaire avec ces valeurs
+   		 const genes = [{% for gene in genes %}'{{ gene }}'{% if not loop.last %}, {% endif %}{% endfor %}];
+
+  		 genes.forEach((gene, index) => {
+       		     document.getElementById(gene).value = sample[index] || 0;
+    	         });
+
+	    } catch (error) {
+   		alert('Erreur lors du chargement des données d\'exemple: ' + error.message);
+	    }
+
         });
         
         document.getElementById('clearForm').addEventListener('click', function() {
