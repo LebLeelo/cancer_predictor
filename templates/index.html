@@ -1,4 +1,3 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -8,19 +7,139 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --primary-dark: #365785;
+            --secondary-color: #cdb4db;
+            --bar-color: #9b7ede;
+            --result-color-1: #4a6fa5;
+            --result-color-2: #4a6fa5;
+            --light-bg: #f8f9fb;
+            --dark-text: #2c3e50;
+            --light-text: #f8f9fb;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--bar-color));
+            color: var(--light-text);
+            border-radius: 0 0 15px 15px;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .app-title {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            border-bottom: none;
+            padding: 15px 20px;
+        }
+        
+        .card-body {
+            padding: 25px;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .btn-outline-danger {
+            color: #e57373;
+            border-color: #e57373;
+        }
+        
         .gene-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
         }
-        .result-card {
+        
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid #dce1e8;
+            padding: 8px 12px;
             transition: all 0.3s ease;
-            transform: scale(0.95);
         }
+        
+        .form-control:focus {
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+            border-color: var(--primary-color);
+        }
+        
+        .result-card {
+            transition: all 0.4s ease;
+            transform: scale(0.97);
+            height: 100%;
+            border: 2px solid var(--primary-color) !important;
+        }
+        
         .result-card.active {
             transform: scale(1);
-            box-shadow: 0 0 15px rgba(0,123,255,0.5);
+            box-shadow: 0 8px 20px rgba(74, 111, 165, 0.2);
         }
+        
+        .bg-primary-custom {
+            background-color: var(--primary-color);
+        }
+        
+        .bg-result-1 {
+            background-color: var(--result-color-1);
+        }
+        
+        .bg-result-2 {
+            background-color: var(--result-color-2);
+        }
+        
+        .text-primary-custom {
+            color: var(--primary-color);
+        }
+        
+        .progress {
+            height: 12px;
+            border-radius: 6px;
+            background-color: #e9ecef;
+        }
+        
+        .progress-bar {
+            background-color: var(--bar-color);
+        }
+        
         #loading-spinner {
             display: none;
             position: fixed;
@@ -28,17 +147,46 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255,255,255,0.8);
+            background-color: rgba(248, 249, 251, 0.85);
             z-index: 1000;
             justify-content: center;
             align-items: center;
         }
+        
+        .spinner-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .spinner-text {
+            margin-top: 15px;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        
+        .alert-warning {
+            background-color: #fff3e0;
+            border-color: #ffe0b2;
+            color: #e65100;
+        }
+        
+        /* Style pour les flèches de l'input number */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
-    <div class="container py-4">
-        <h1 class="text-center mb-4">Prédicteur de Type de Cancer basé sur l'Expression Génique</h1>
-        
+    <div class="app-header">
+        <div class="container">
+            <h1 class="app-title text-center mb-1">Prédicteur de Type de Cancer</h1>
+            <p class="text-center mb-0">Analyse basée sur l'expression génique</p>
+        </div>
+    </div>
+    
+    <div class="container py-2">
         {% if not ml_ready %}
         <div class="alert alert-warning" role="alert">
             <h4 class="alert-heading">Modèle non disponible!</h4>
@@ -52,54 +200,60 @@
         {% endif %}
         
         <div class="card mb-4 {% if not ml_ready %}opacity-50{% endif %}">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-primary-custom text-white">
                 <h3 class="card-title mb-0">Entrez les valeurs d'expression génique</h3>
             </div>
             <div class="card-body">
                 <form id="gene-form">
                     <div class="mb-3">
-                        <button type="button" id="loadSample" class="btn btn-secondary mb-3" {% if not ml_ready %}disabled{% endif %}>Charger un exemple</button>
-                        <button type="button" id="clearForm" class="btn btn-outline-danger mb-3 ms-2" {% if not ml_ready %}disabled{% endif %}>Effacer</button>
+                        <button type="button" id="loadSample" class="btn btn-secondary mb-3" {% if not ml_ready %}disabled{% endif %}>
+                            <i class="bi bi-file-earmark-arrow-down"></i> Charger un exemple
+                        </button>
+                        <button type="button" id="clearForm" class="btn btn-outline-danger mb-3 ms-2" {% if not ml_ready %}disabled{% endif %}>
+                            <i class="bi bi-x-circle"></i> Effacer
+                        </button>
                     </div>
                     
                     <div class="gene-grid">
                         {% for gene in genes %}
                         <div class="mb-2">
-                            <label for="{{ gene }}" class="form-label small">{{ gene }}</label>
-                            <input type="number" step="any" class="form-control form-control-sm" id="{{ gene }}" name="{{ gene }}" placeholder="0" {% if not ml_ready %}disabled{% endif %}>
+                            <label for="{{ gene }}" class="form-label small fw-medium">{{ gene }}</label>
+                            <input type="number" step="any" class="form-control form-control-sm gene-input" id="{{ gene }}" name="{{ gene }}" placeholder="0" {% if not ml_ready %}disabled{% endif %}>
                         </div>
                         {% endfor %}
                     </div>
                     
                     <div class="mt-4 text-center">
-                        <button type="submit" class="btn btn-primary" {% if not ml_ready %}disabled{% endif %}>Prédire le type de cancer</button>
+                        <button type="submit" class="btn btn-primary btn-lg px-4" {% if not ml_ready %}disabled{% endif %}>
+                            Prédire le type de cancer
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
         
         <div id="results" class="row" style="display: none;">
-            <div class="col-md-6">
-                <div class="card result-card active">
-                    <div class="card-header bg-success text-white">
+            <div class="col-md-6 mb-4">
+                <div class="card result-card active h-100">
+                    <div class="card-header bg-result-1 text-white">
                         <h3 class="card-title mb-0">Résultat de la prédiction</h3>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body d-flex flex-column justify-content-center">
                         <div class="text-center mb-4">
-                            <h4>Type de cancer prédit:</h4>
-                            <h2 id="predicted-type" class="text-primary"></h2>
-                            <div class="progress mt-2">
+                            <h4 class="text-muted mb-3">Type de cancer prédit:</h4>
+                            <h2 id="predicted-type" class="text-primary-custom mb-4"></h2>
+                            <div class="progress mb-2">
                                 <div id="confidence-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
                             </div>
-                            <p class="mt-2">Confiance: <span id="confidence-value">0</span>%</p>
+                            <p class="mt-2 fw-medium">Confiance: <span id="confidence-value">0</span>%</p>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="col-md-6">
-                <div class="card result-card">
-                    <div class="card-header bg-info text-white">
+            <div class="col-md-6 mb-4">
+                <div class="card result-card h-100">
+                    <div class="card-header bg-result-2 text-white">
                         <h3 class="card-title mb-0">Distribution des probabilités</h3>
                     </div>
                     <div class="card-body">
@@ -110,8 +264,9 @@
         </div>
         
         <div id="loading-spinner">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Chargement...</span>
+            <div class="spinner-container">
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+                <div class="spinner-text">Analyse en cours...</div>
             </div>
         </div>
     </div>
@@ -125,6 +280,21 @@
             const inputs = document.querySelectorAll('#gene-form input');
             inputs.forEach(input => input.disabled = true);
         }
+        
+        // Configurer les inputs pour incrémenter/décrémenter de 0.1 avec les flèches
+        document.querySelectorAll('.gene-input').forEach(input => {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const currentValue = parseFloat(input.value) || 0;
+                    if (e.key === 'ArrowUp') {
+                        input.value = (currentValue + 0.1).toString();
+                    } else {
+                        input.value = (currentValue - 0.1).toString();
+                    }
+                }
+            });
+        });
         
         document.getElementById('gene-form').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -164,11 +334,19 @@
                 // Mettre à jour le graphique
                 updateChart(result.all_probabilities);
                 
-                // Afficher la section des résultats
-                document.getElementById('results').style.display = 'flex';
+                // Afficher la section des résultats avec une légère animation
+                const resultsSection = document.getElementById('results');
+                resultsSection.style.display = 'flex';
                 
-                // Scroll vers les résultats
-                document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+                // Animation des cartes de résultats
+                setTimeout(() => {
+                    document.querySelectorAll('.result-card').forEach(card => {
+                        card.classList.add('active');
+                    });
+                }, 100);
+                
+                // Scroll vers les résultats avec animation
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 
             } catch (error) {
                 alert('Une erreur est survenue: ' + error.message);
@@ -203,7 +381,16 @@
             if (!mlReady) return;
             
             document.getElementById('gene-form').reset();
-            document.getElementById('results').style.display = 'none';
+            
+            // Masquer les résultats avec une animation
+            const resultsCards = document.querySelectorAll('.result-card');
+            resultsCards.forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            setTimeout(() => {
+                document.getElementById('results').style.display = 'none';
+            }, 300);
         });
         
         function updateChart(probabilities) {
@@ -214,6 +401,23 @@
                 chart.destroy();
             }
             
+            // Couleurs harmonieuses pour le graphique
+            const backgroundColors = [
+                'rgba(155, 126, 222, 0.7)',  // Violet clair
+                'rgba(199, 143, 255, 0.7)',  // Violet-rose
+                'rgba(134, 179, 209, 0.7)',  // Bleu clair
+                'rgba(173, 147, 230, 0.7)',  // Lilas
+                'rgba(205, 180, 219, 0.7)'   // Rose pâle
+            ];
+            
+            const borderColors = [
+                'rgba(155, 126, 222, 1)',
+                'rgba(199, 143, 255, 1)',
+                'rgba(134, 179, 209, 1)',
+                'rgba(173, 147, 230, 1)',
+                'rgba(205, 180, 219, 1)'
+            ];
+            
             // Créer un nouveau graphique
             chart = new Chart(ctx, {
                 type: 'bar',
@@ -222,35 +426,50 @@
                     datasets: [{
                         label: 'Probabilité (%)',
                         data: Object.values(probabilities),
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.7)',
-                            'rgba(54, 162, 235, 0.7)',
-                            'rgba(255, 206, 86, 0.7)',
-                            'rgba(75, 192, 192, 0.7)',
-                            'rgba(153, 102, 255, 0.7)'
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)'
-                        ],
-                        borderWidth: 1
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1,
+                        borderRadius: 5
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: true,
                     scales: {
                         y: {
                             beginAtZero: true,
-                            max: 100
+                            max: 100,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
                         }
                     },
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(44, 62, 80, 0.9)',
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return `Probabilité: ${context.raw.toFixed(2)}%`;
+                                }
+                            }
                         }
+                    },
+                    animation: {
+                        duration: 1000
                     }
                 }
             });
