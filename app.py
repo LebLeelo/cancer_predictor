@@ -110,4 +110,5 @@ def sample_data():
 
 if __name__ == '__main__':
     # Exécution avec debug=False pour éviter le double chargement du modèle
-    app.run(debug=False)
+    port = int(os.environ.get("PORT", 10000))  # Render utilise PORT ou 10000 par défaut
+    app.run(host='0.0.0.0', port=port, debug=False)
